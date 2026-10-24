@@ -1,0 +1,322 @@
+-- update - 2026.04.21
+
+- feat(cleanup): Cleanup is fully customizable now — add, disable, or retarget rules per directory, pattern, and age right in `cleanup.json`. No code edit needed.
+- feat(centralized): New `--validate` flag runs a one-shot SteamCMD file check without changing your saved config.
+- feat(installer): Daemon installer re-asks if you mistype yes/no instead of quietly aborting.
+- feat(logging): Cleaner log output — level tag in a fixed column (`INFO`, `OK`, `WARN`, `ERROR`, `DEBUG`), message colored per severity.
+- feat(logging): Every fatal error now prints a short code with a docs link. Skim the new error reference instead of scrolling the log.
+- feat(logging): Your Steam account token is automatically hidden from every log line, not just the startup command.
+- fix(daemon): First-boot race fixed — the egg no longer accidentally triggers a full SteamCMD download while the daemon is still pushing game files.
+- fix(daemon): If the central daemon goes down, servers recover cleanly on the next restart and rebuild from SteamCMD instead of crashing on missing files.
+- fix(daemon): Wait-for-daemon messages only appear when the wait actually lasts longer than a couple of seconds — fast starts stay quiet.
+- fix(centralized): Permissions on pushed game files are correct again (files stay at 644, not marked as executable). Prevents Pterodactyl's file manager from flagging them as anomalies.
+- fix(centralized): SteamCMD-only directories (`Steam/`, `steamapps/`) are no longer pushed into server volumes — they served no runtime purpose and were getting deleted each boot.
+- fix(entrypoint): `VALIDATE_INSTALL=1` always shows the "may wipe configs" warning and waits 5 seconds before running, giving you time to stop the server and cancel.
+- fix(entrypoint): SteamCMD failures no longer print the same error line twice.
+- fix(cleanup): Core dump files at the container root are now cleaned up alongside the ones in the game binary directory.
+- docs(error-codes): New reference page (`docs/advanced/error-codes.md`) lists every egg error code with symptom, cause, and fix.
+- docs(cleanup): New guide (`docs/features/cleanup.md`) with custom rule examples — longer demo retention, per-plugin log sweeps, and how to disable a rule without losing it.
+
+-- update - 2026.04.15
+
+- fix(update_helper): Local SteamCMD installs were misdetected as daemon-managed → updates silently disabled and steamcmd dir deleted on restart. Detection rewritten to mount + heartbeat marker (10min TTL).
+- feat(centralized): Daemon writes .daemon-managed marker before sync and on every container start event - reliable signal for all push methods (symlink/hardlink/copy).
+
+-- update - 2026.04.14
+
+- feat: Pelican panel support
+- feat(modsharp): admins.jsonc preserved across updates (backup + restore alongside core.json)
+- feat(centralized): Installer script (install-cs2-update.sh) - guided wizard, systemd daemon setup, cron registration, auto troubleshoot
+- feat(centralized): AUTO_RESTART_SERVERS default changed to true
+- feat(centralized): UPDATE_CHECK_INTERVAL default changed to \* (every cron run, rate-limited by script)
+- feat(metamod): Switched to GitHub releases, always uses prerelease channel (CS2 builds)
+- feat(metamod): GitHub mirror fallback (ghproxy.net, gh.llkk.cc) for restricted regions. This is for Asian community with love who reported their issue!
+- feat(updater): All GitHub downloads automatically try mirrors on failure (1 attempt per source).
+- feat(cleanup): steamcmd, steamapps, Steam directories removed when game files are externally managed (saves ~200MB+)
+- refactor(update_helper): SteamCMD auto-removed from container when daemon VPKs confirmed accessible
+- deprecation(sync): SYNC_LOCATION support marked for removal 2026-10-01
+- docs(vpk-sync): Rewritten around installer script, storage savings table, push methods, lock behavior
+- docs(readme): Added Centralized Update & VPK Sync section with installer one-liner
+
+-- update - 2026.02.12
+
+- fix(gdb): Replaced background gdbserver --attach with Valve's native GAME_DEBUGGER env var
+- fix(gdb): Suspend/breakpoints now work without SYS_PTRACE Docker capability
+- fix(gdb): gdbserver launches cs2 as parent process instead of attaching externally
+
+-- update - 2026.02.05
+
+- fix: Update ModSharp directory paths for consistency in backup and restore operations
+
+-- update - 2025.12.19
+
+- feat(cleanup): Enhance core dump deletion to include numbered core files
+
+-- update - 2025.12.16
+
+- feat(cleanup): Core dump cleanup added (~2.2 GB disk space freed per restart)
+- feat(egg): Startup detection changed to "Source2Init OK" for better ModSharp compatibility
+- refactor(modsharp): ModSharp updater optimized from 297 to 158 lines (-46.8% code reduction)
+- refactor(modsharp): Direct GitHub API integration for multiple asset downloads (core + extensions)
+- refactor(modsharp): Uses common handle_download_and_extract() utility for consistency
+- refactor(modsharp): Removed duplicate get_latest_modsharp_release() function
+- refactor(modsharp): Removed unnecessary install_modsharp() wrapper function
+- refactor(modsharp): Fixed extraction paths (core → /game/, extensions → /game/sharp/shared/)
+- refactor(modsharp): Config backup/restore centralized (core.json preservation)
+- optimise(updater): TEMP_DIR centralized in updater_common.sh (DRY principle applied)
+- optimise(updater): Removed redundant TEMP_DIR declarations from all updater scripts
+
+-- update - 2025.11.28
+
+- feat(updater): Added PRERELEASE egg variable to allow downloading prerelease/beta versions from GitHub
+- feat(updater): New centralized get_github_release() function in updater_common.sh
+- fix(swiftlys2): Update now properly overwrites bin/ and gamedata/ directories (was using cp -rn which never updated existing files)
+- feat(cleanup): Added SwiftlyS2 logs cleanup (/game/csgo/addons/swiftlys2/logs/\*.log)
+- optimise(docker): Removed unused packages from Dockerfile (cron, mawk)
+
+-- update - 2025.11.20
+
+- feat(centralized): Multi-registry support for container detection (Docker Hub + GHCR)
+- feat(centralized): SERVER_IMAGE now accepts multiple images separated by spaces or commas
+- feat(centralized): Container list display before restart for better visibility
+- fix(centralized): Container restart iteration failing after first container with set -e
+- upgrade(modsharp): Updated .NET runtime from 9.0.0 to 10.0.0
+
+-- update - 2025.11.19
+
+- feat(entrypoint): Added GDB remote debugging support with automatic process attachment
+- feat(egg): Added GDB_DEBUG_PORT variable for IDA Pro and GDB client integration
+- feat(entrypoint): Automatic CS2 process detection and gdbserver initialization on specified port
+- docs: Added comprehensive GDB debugging documentation with IDA Pro setup guide
+- docs: Documented server lock behavior and remote debugging workflow
+
+-- update - 2025.11.14
+
+- feat(centralized): Wings API integration for seamless Pterodactyl server restarts
+- feat(centralized): Automatic SSL/non-SSL detection from Wings configuration
+- feat(centralized): --simulate flag to test restart logic without downloading CS2 updates
+- feat(centralized): Only restarts running servers (stopped servers remain stopped intentionally)
+- feat(build): GitHub Container Registry (ghcr.io) publishing support with unlimited pulls
+- feat(build): -g/--ghcr flag for GitHub Container Registry, -a/--all for both registries
+- feat(build): Pre-build validation for shell script syntax and source dependencies
+- feat(egg): Hidden PREFIX_TEXT variable to customize log prefix text (default: KitsuneLab)
+- feat(entrypoint): Automatic crash detection with troubleshooting guide for common issues
+- refactor(build): Changed -P flag to -d/--dockerhub for explicit registry selection
+- refactor(build): Replaced emoji symbols with simple text symbols for consistency
+- refactor(egg): Default Docker image changed to GitHub Container Registry (ghcr.io/k4ryuu/cs2-egg)
+- optimise(build): Credential caching for GHCR (no repeated authentication needed)
+- optimise(build): Logging output compacted and cleaner structured
+- optimise(config): Config templates use $CONFIG_VERSION variable instead of hardcoded versions
+- optimise(config): Migration checks version once and logs once (removed CONFIG_CHANGES tracking)
+- optimise(config): Centralized smart_merge function eliminates 150 lines of duplicated code
+- optimise(cleanup): Platform detection cached at startup (50% fewer uname system calls)
+- optimise(filter): Exact pattern matching uses O(1) hash lookup instead of iteration
+- optimise(filter): Separated blocking and masking patterns for faster processing
+- optimise(logging): Log level priority cached and reused (20% faster log message filtering)
+- optimise(update_helper): Auto-cleanup obsolete configs (auto-restart.json, webhook.json) on new egg detection
+- remove(config): Removed unused logging config fields (file_level, colors.enabled, colors.use_emoji)
+- fix(config): Bumped config version to 1.0.1 to trigger migration for updated logging.json structure
+- fix(config): Migration preserves only fields that exist in new template (deleted fields stay deleted)
+- fix(logging): Console log level from logging.json now properly applied (was always INFO regardless of config)
+- docs: Updated VPK sync documentation with Wings API details and simulate mode usage
+- docs: Added Docker registry comparison (Docker Hub vs GitHub pull rate limits)
+- docs: Installation guide updated with registry selection and pull limit details
+- docs: Added hidden variables documentation (PREFIX_TEXT, ALLOW_TOKENLESS) to configuration guide
+
+-- update - 2025.11.13
+
+- feat(centralized): Automatic self-update from GitHub with validation and rollback (enabled by default)
+- feat(centralized): Preserves user configuration during self-update (paths, settings auto-transferred)
+- feat(centralized): Input validation for paths and configurations (security hardening)
+- feat(centralized): Lock file mechanism to prevent concurrent execution (cron-safe)
+- feat(centralized): Optional validate flag for faster updates (disabled by default)
+- feat(centralized): Versioned backup system (keeps last 3 versions for rollback)
+- feat(centralized): Automatic SteamCMD dependency installation (i386 + 32-bit libraries)
+- feat(centralized): Multi-distro support with fallback logic (Ubuntu 18.04+, Debian 10+)
+- feat(centralized): Intelligent SteamCMD error detection with contextual help (0x202 and more later)
+- feat(centralized): Health check system validates prerequisites before installation
+- feat(centralized): Spinner animation for blocking operations (package install, container restarts)
+- feat(centralized): Version-based update detection (replaces hash comparison for config independence)
+- refactor(centralized): Uses SteamCMD native version checking (removed Steam API dependency)
+- refactor(centralized): Uses Docker native commands for server restarts (removed Pterodactyl API)
+- refactor(centralized): Finds all containers matching image name regardless of tag/branch
+- refactor(centralized): Comprehensive error handling with detailed output on failures
+- optimise(centralized): Reduced verbose logging (replaced repetitive messages with comments)
+- remove(centralized): No longer requires curl, jq, or Pterodactyl API credentials (simpler setup)
+- fix(centralized): Nested command substitution causing corrupted version files and duplicate logs
+- fix(centralized): Argument list overflow from corrupted version file
+- fix(centralized): Argument list overflow when restarting many servers
+- fix(centralized): Dependency installation return logic causing premature exit on success
+- fix(centralized): apt-get update failures silently ignored after i386 architecture addition
+- fix(centralized): Hash comparison falsely detecting updates due to user config differences
+
+-- update - 2025.11.12
+
+- feat: Multi-framework support with independent boolean toggles per addon
+- feat: Added ModSharp as standalone addon with .NET 9 runtime auto-installation
+- feat: Migrated to SwiftlyS2 v2 (standalone, no MetaMod dependency)
+- feat: Smart Docker image cleanup in build script (only removes replaced images)
+- feat: Centralized gameinfo.gi management preserving all configured addons
+- feat: MetaMod load order enforcement (always first after LowViolence)
+- feat: SwiftlyS2 load order enforcement (always last before Game csgo for ModSharp compatibility)
+- feat: ModSharp + SwiftlyS2 compatibility via automatic load order management
+- feat: Added ALLOW_TOKENLESS hidden variable for RequireLoginForDedicatedServers patching
+- refactor: Code restructure with centralized updater functions (~320 lines eliminated)
+- refactor: Standardized logging and version management across all updaters
+- upgrade: Enhanced addon selection with descriptive standalone options
+- upgrade: All scripts now read-only (555 permissions) for security
+- upgrade: MetaMod auto-enabled with warning when CSS is selected
+- remove: Obsolete per-addon AUTOUPDATE variables and old Swiftly v1 option
+- remove: ADDON_SELECTION dropdown (deprecated, backwards compatible until next patch)
+- fix: Version file operations and duplicate migration messages
+- fix: Multiple addons now coexist properly in gameinfo.gi SearchPaths
+- fix: VPK sync now excludes gameinfo.gi to preserve addon configurations
+
+-- update - 2025.11.07
+
+- feat: Introduced organized /egg/ directory structure for all egg-related files
+- feat: Implemented FTP-editable JSON configuration system with 5 config files
+- feat: Added config version migration system with automatic backup and smart merge
+- feat: Replaced environment variables with JSON configs for auto-restart, webhook, filter, cleanup, and logging
+- feat: Implemented API-based version checking via api.steamcmd.net (non-blocking, fast)
+- feat: Added Pterodactyl API integration for automatic server restart
+- feat: Introduced daily log rotation with triple limits (size, count, age)
+- feat: Created automatic legacy file migration system (update_helper.sh)
+- refactor: Moved auto-restart configuration from ~10 environment variables to single JSON file
+- refactor: Consolidated all configs into /egg/configs/ directory (FTP accessible)
+- refactor: Complete rewrite of docker/utils/config.sh with version management
+- refactor: Simplified Pterodactyl egg variables from ~20 to ~8 (60% reduction)
+- refactor: Switched add-on selection values to descriptive labels (more readable Panel UI)
+- refactor: Unified update control under AUTO_UPDATE (replaces UPDATE_AUTO_RESTART)
+- upgrade: Enhanced auto-restart system with client API token support
+- optimise: Replaced unbuffer (expect) with stdbuf for console piping (~1.2MB compressed saving)
+- optimise: Switched awk dependency from gawk to mawk to reduce image size (~3-4MB compressed saving)
+- remove: Deleted redundant steamcmd_version_check.sh (merged into version.sh)
+- remove: Removed 12+ legacy environment variables (migrated to JSON configs)
+- remove: Removed expect package from Docker image (no longer needed after stdbuf switch)
+- security: API tokens now user-configurable via FTP (not environment)
+- security: Removed default API token values from egg to prevent extraction
+- security: Implemented per-user API token system (not shared across servers)
+- security: Added automatic GSLT token masking in logs
+- docs: Updated 15+ documentation pages for new configuration system
+- docs: Created comprehensive troubleshooting guide with new scenarios
+- docs: Created detailed configuration files reference documentation
+- fix: Fixed entrypoint.sh syntax error with sed regex escaping
+
+-- update - 2025.04.29
+
+- feat: Replaced separate toggles for MetaMod and CounterStrikeSharp with a unified "Server Add-ons" dropdown
+- feat: Added support for Swiftly as a server add-on option
+- feat: Server add-ons now offer four options as None, Metamod Only, Metamod + CounterStrikeSharp, Metamod + Swiftly
+
+-- update - 2025.03.27
+
+- feat: Added support for the new CounterStrikeSharp versioning schema
+- feat: Added support for with-runtime and without runtime installs
+
+-- update - 2024.11.28
+
+- feat: Added SteamCMD installed, which useful for centralized file systems or to repair user deletions
+- fix: Update validated the game files forcefully
+- fix: Udpdate broke after a SteamCMD function update
+- fix: Egg log file was not used properly by the logger
+- upgrade: Steam version checker to prevent caching
+
+-- update - 2024.11.21 - Optimisation Update
+
+- feat: Junk cleaner now shows the freed space, duration and overall counter
+- feat: Message filter now supports @prefix for exact pattern matching
+- feat: Message filter now displays detailed pattern load statistics on startup
+- feat: Patterns can now have replacement values for masking sensitive data
+- optimise: Update system now has centralized download and extract handling
+- optimise: Changed to startup only log cleanup for better performance
+- optimise: Junk cleaner now uses a better way to find and eliminate the files
+- optimise: Removed some redundant validations
+- optimise: Message filter now processes patterns only once during initialization
+- optimise: Pattern matching now uses hash maps for faster lookups
+- optimise: Message filter now has early return for empty messages
+- optimise: Added retry mechanism for downloads with proper error handling
+- optimise: Version checking is now centralized and more efficient
+- optimise: Improved file operations with less I/O usage
+- optimise: Replaced awk with sed for better performance
+- optimise: Muted unnecessary file operation outputs
+- optimise: Junk cleaner wont show the exact deleted files except in debug mode for less I/O operations
+- optimise: Steam token masking is now integrated into the pattern system
+- fix: Metamod gameinfo update issues
+- fix: All values have now a default value to prevent issues by missing variables
+- fix: Added proper error handling and signal management
+
+-- update - 2024.11.18
+
+- feat: Added option to save egg logs to a file with a 48-hour rotation
+- feat: Added option to change the log level for console and file log messages
+- upgrade: Allowed the countdown command to be empty
+- remove: Removed some redundant code
+
+-- update - 2024.11.17
+
+- feat: Add environment default value setter to ensure required variables are maintained
+- chore: Auto-Restart game version checker now uses different file
+- chore: Changed max slot number to 64
+- chore: Changed Auto-Restart API KEY to match the correct length
+- fix: Auto-Restart now initialize game version to file if not present
+- fix: Prevent Auto-Restart from validating during countdown if an update is in progress
+- remove: Unused source include in this version of the egg
+
+-- update - 2024.11.16
+
+- fix: The Steam token mask removed other matching patterns aswell from being visible
+- fix: Removed maxplayers_override from startup as its deprecated
+
+-- update - 2024.11.15
+
+- feat: Added Auto-Restart feature to automatically restart the server if it has a newer version
+- feat: The console now censures the Steam Token of the user for security reasons (sending logs, screenshots, etc.)
+- upgrade: Changed MetaMod auto-updater to use GitHub aswell due to some users had issues calling alliedmods.net
+- refactor: The full script has been refactored for easier maintanaibility
+- chore: Changed some of the variable rules to use boolean
+- chore: Changed some of the variables naming and descriptions for better understanding
+
+-- update - 2024.10.02
+
+- fix: Round backup cleaner removed some other files
+
+-- update - 2024.08.20
+
+- fix: Server shutdown was handled like Segmentation fault
+- fix: Server shown crash state and no answer dialog instead of kicking users
+
+-- update - 2024.07.28
+
+- feat: Added console filter to block unwanted messages (import the egg again to have it)
+- feat: Added preview mode for console filter to show what messages you block exactly (import the egg again to have it)
+- chore: Fix some spelling and grammar mistakes
+
+-- update - 2024.07.24
+
+- fix: Junk cleaner was not working at all
+
+-- update - 2024.07.01
+
+- feat: Added Dev branch support with tag `dev` (import the egg again to have it)
+- feat: Added proper names for the images (import the egg again to have it)
+- fix: Removed redundant codes at logging and coloring sections
+- fix: Removed debug message leftovers at metamod updater
+- fix: Removed error upon server shutdown and added a good message instead
+- fix: Re-phrased some messages for better understanding
+- fix: Removed cleanup messages with 0 files for less spam
+
+-- update - 2024.06.20
+
+- upgrade: Metamod version finder logic
+- fix: Metamod updater not working correctly
+- fix: Changed updaters to start the server even if the download fails
+
+-- update - 2024.06.15
+
+- fix: Variable name miss-matches
+- fix: MetaMod files are not overwritten correctly
+
+-- update - 2024.06.14
+
+- fix: Issues where you was unable to disable the scripts

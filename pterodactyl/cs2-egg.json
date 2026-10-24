@@ -1,0 +1,232 @@
+{
+  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": "https://raw.githubusercontent.com/shmitzas/CS2-Ptero-Egg/main/pterodactyl/cs2-egg.json"
+  },
+  "exported_at": "2026-03-30T16:51:51+00:00",
+  "name": "CS2 Ptero Egg",
+  "author": "paslaugos.rampage@gmail.com",
+  "description": "The SteamRT3 Platform image for Pterodactyl & Pelican CS2 servers is packed with numerous features, designed to simplify server management and reduce hassle.",
+  "features": [],
+  "docker_images": {
+    "CS2 Ptero Egg (GHCR)": "ghcr.io/shmitzas/cs2-ptero-egg:latest"
+  },
+  "file_denylist": [],
+  "startup": "./game/cs2.sh {{CUSTOM_PARAMS}} -dedicated +ip 0.0.0.0 -port {{SERVER_PORT}} +map {{SRCDS_MAP}} -maxplayers {{SRCDS_MAXPLAYERS}} +sv_setsteamaccount {{STEAM_ACC}} +game_type {{GAME_TYPE}} +game_mode {{GAME_MODE}} -disable_workshop_command_filtering",
+  "config": {
+    "files": "{}",
+    "startup": "{\r\n    \"done\": \"Source2Init OK\"\r\n}",
+    "logs": "{}",
+    "stop": "quit"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/bash\n# Dummy install script - actual installation happens on first startup\nexit 0",
+      "container": "ghcr.io/pterodactyl/installers:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Prefix Text",
+      "description": "Custom text for console prefix. Default: CS2",
+      "env_variable": "PREFIX_TEXT",
+      "default_value": "CS2",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "string|max:20",
+      "field_type": "text"
+    },
+    {
+      "name": "Allow Tokenless Servers",
+      "description": "Internal setting to allow servers to run without GSLT token.",
+      "env_variable": "ALLOW_TOKENLESS",
+      "default_value": "0",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Source AppID",
+      "description": "NOT VISIBLE TO USERS. DO NOT EDIT.",
+      "env_variable": "SRCDS_APPID",
+      "default_value": "730",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|numeric",
+      "field_type": "text"
+    },
+    {
+      "name": "Max Players",
+      "description": "The maximum number of players the server can host.",
+      "env_variable": "SRCDS_MAXPLAYERS",
+      "default_value": "32",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|numeric|max:64|min:5",
+      "field_type": "text"
+    },
+    {
+      "name": "Disable Updates",
+      "description": "Set to 1 to stop updates.",
+      "env_variable": "SRCDS_STOP_UPDATE",
+      "default_value": "0",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|numeric",
+      "field_type": "text"
+    },
+    {
+      "name": "Validate Install",
+      "description": "Toggles SteamCMD validation of game server files. Set to 0 to disable.",
+      "env_variable": "SRCDS_VALIDATE",
+      "default_value": "0",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|numeric",
+      "field_type": "text"
+    },
+    {
+      "name": "Game Server Login Token (GSLT)",
+      "description": "The Steam Game Server Login Token (GSLT) used to publicly list your server. Optional, but recommended for increased visibility and access to additional features. Learn more: https://steamcommunity.com/dev/managegameservers",
+      "env_variable": "STEAM_ACC",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "max:32|nullable",
+      "field_type": "text"
+    },
+    {
+      "name": "Map",
+      "description": "The default map for the server.",
+      "env_variable": "SRCDS_MAP",
+      "default_value": "de_dust2",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|alpha_dash",
+      "field_type": "text"
+    },
+    {
+      "name": "Game Type",
+      "description": "Paired with Game Mode to pick the CS2 mode. 0 + 0 = Casual, 0 + 1 = Competitive, 0 + 2 = Wingman, 1 + 0 = Arms Race, 1 + 1 = Demolition, 1 + 2 = Deathmatch, 2 + 0 = Custom, 3 + 0 = Guardian, 4 + 0 = Danger Zone.",
+      "env_variable": "GAME_TYPE",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|numeric|in:0,1,2,3,4,5,6",
+      "field_type": "text"
+    },
+    {
+      "name": "Game Mode",
+      "description": "Second half of the mode pair \u2014 see Game Type for the combinations.",
+      "env_variable": "GAME_MODE",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|numeric|in:0,1,2,3,4",
+      "field_type": "text"
+    },
+    {
+      "name": "MetaMod:Source",
+      "description": "Base plugin framework required by CounterStrikeSharp. Compatible with all frameworks. Auto-enabled if CSS is selected. Automatically updates on server restart while enabled.",
+      "env_variable": "INSTALL_METAMOD",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "CounterStrikeSharp",
+      "description": "C# scripting platform for CS2 plugins with .NET 10 runtime. Requires MetaMod:Source (auto-enabled). Compatible with SwiftlyS2. Incompatible with ModSharp. Automatically updates on server restart while enabled.",
+      "env_variable": "INSTALL_CSS",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "SwiftlyS2",
+      "description": "C# framework for Source Engine 2 servers with .NET 10 runtime. MetaMod is optional, not required. Runs alongside CounterStrikeSharp. Conflicts with ModSharp. Automatically updates on server restart while enabled.",
+      "env_variable": "INSTALL_SWIFTLY",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "ModSharp",
+      "description": "Standalone C# scripting platform with .NET 10 runtime. Compatible with MetaMod only. Conflicts with CSS and SwiftlyS2 \u2014 enabling them together only logs a warning, nothing is disabled for you. Automatically updates on server restart while enabled.",
+      "env_variable": "INSTALL_MODSHARP",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Allow Prerelease Updates",
+      "description": "Allow downloading prerelease/beta versions of frameworks (CSS, SwiftlyS2, ModSharp) from GitHub. Warning: Prereleases may be unstable.",
+      "env_variable": "PRERELEASE",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Console Filter",
+      "description": "Filter unwanted console messages. Configure filter patterns in /home/container/egg/configs/console-filter.json",
+      "env_variable": "ENABLE_FILTER",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Custom Parameters",
+      "description": "Custom startup parameters to add to the command line.",
+      "env_variable": "CUSTOM_PARAMS",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "string|nullable",
+      "field_type": "text"
+    },
+    {
+      "name": "Auto Cleanup",
+      "description": "Automatically cleans up old logs, demos, and backup files. Configure cleanup intervals in /home/container/egg/configs/cleanup.json",
+      "env_variable": "CLEANUP_ENABLED",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "GDB Remote Debug Port",
+      "description": "GDB remote debugging port for IDA. Specify port number (e.g., 27130) and allocate it in network settings. Connect: IDA → Debugger → Remote GDB debugger. Performance impact: ~5-10%. Leave empty to disable. Development only!",
+      "env_variable": "GDB_DEBUG_PORT",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "nullable|numeric",
+      "field_type": "text"
+    },
+    {
+      "name": "Daemon Wait Timeout (s)",
+      "description": "How long the container waits for the VPK daemon to finish pushing game files before falling through to SteamCMD. Increase if you see cfg files getting wiped after morning update restarts on hosts with many CS2 servers. Default 180s covers ~30 servers on the same host.",
+      "env_variable": "DAEMON_WAIT_MAX_SECS",
+      "default_value": "180",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|numeric|min:5",
+      "field_type": "text"
+    }
+  ]
+}
