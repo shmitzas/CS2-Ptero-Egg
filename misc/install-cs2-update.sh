@@ -265,8 +265,10 @@ WantedBy=multi-user.target
 EOF
     systemctl daemon-reload
     systemctl enable cs2-vpk-daemon
-    if systemctl start cs2-vpk-daemon 2>/dev/null; then
-        log_ok "Service installed, enabled and started (cs2-vpk-daemon)"
+    # restart, not start: on a reinstall the unit is already active and start would no-op,
+    # leaving the old process running the previous script and config.
+    if systemctl restart cs2-vpk-daemon 2>/dev/null; then
+        log_ok "Service installed, enabled and running (cs2-vpk-daemon)"
     else
         log_ok "Service installed and enabled"
         log_warn "Daemon did not start - check: journalctl -u cs2-vpk-daemon"

@@ -126,6 +126,42 @@ journalctl -u cs2-vpk-daemon --since "1 hour ago"
 > curl -fsSL https://raw.githubusercontent.com/shmitzas/CS2-Ptero-Egg/main/misc/install-cs2-update.sh -o /tmp/install-cs2-update.sh && sudo bash /tmp/install-cs2-update.sh
 > ```
 
+### Server stuck on "Waiting for daemon to finish push..."
+
+**Symptom:** a server sits on that line for ~3 minutes, then downloads its own ~30 GB copy of the game instead of using the shared install.
+
+**Cause:** the daemon picks containers by image name. `SERVER_IMAGE` in `/usr/local/bin/update-cs2-centralized.sh` becomes `docker events --filter image=…`, so a container running any other image never raises an event the daemon listens for — it is never pushed to, and `/home/container/egg/.daemon-managed` is never created. The container waits out `DAEMON_WAIT_MAX_SECS` (180 s) and falls back to SteamCMD.
+
+This bites anyone who changes a server's Docker image, including migrating from another egg — upstream's installer ships `SERVER_IMAGE="sples1/k4ryuu-cs2 ghcr.io/k4ryuu/cs2-egg"`.
+
+**Fix** — re-run the installer. It replaces the script with this repo's copy, whose default already targets the right image, and repoints self-updates at this repo:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/shmitzas/CS2-Ptero-Egg/main/misc/install-cs2-update.sh -o /tmp/install-cs2-update.sh && sudo bash /tmp/install-cs2-update.sh
+```
+
+During a staged migration, where old and new servers run side by side, add this image to the existing list instead. Prepending keeps whatever is already configured — upstream ships two images, and yours may be customised further:
+
+```bash
+grep ^SERVER_IMAGE= /usr/local/bin/update-cs2-centralized.sh    # note the current value
+sudo sed -i 's|^SERVER_IMAGE="|SERVER_IMAGE="ghcr.io/shmitzas/cs2-ptero-egg |' /usr/local/bin/update-cs2-centralized.sh
+grep ^SERVER_IMAGE= /usr/local/bin/update-cs2-centralized.sh    # confirm, and that it ran only once
+sudo systemctl restart cs2-vpk-daemon
+journalctl -u cs2-vpk-daemon -n 20                              # the "Images:" line lists them all
+```
+
+Images are space- or comma-separated. The two update paths treat this key differently: a **self-update** preserves it, so a hand-edit survives; an **installer re-run** does not patch it, so it reverts to this repo's default alone. Neither will correct a stale value you set yourself.
+
+> [!IMPORTANT]
+> **Restart the daemon before the servers, in that order.** The daemon reads `SERVER_IMAGE` once at
+> startup, so an edited file changes nothing until the service restarts — and it only ever reacts to
+> container `create` / `start` / `restart` events, never sweeping containers that are already up. A
+> server left waiting while you restart the daemon has already missed its event and will sit there
+> until the timeout. Restart it afterwards and the push lands immediately.
+
+> [!NOTE]
+> Keeping a daemon installed from another egg works today — it still writes the `egg/.daemon-managed` marker this egg waits on — but upstream has marked that marker legacy and layered a newer `egg/.daemon-status` handshake over it. Install this repo's daemon so the two halves stay on one protocol.
+
 ### Cross-Filesystem Hardlink Error
 
 **Error:** `Cross-filesystem hardlink not possible for ptero-xxxx`

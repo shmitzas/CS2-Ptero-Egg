@@ -24,20 +24,22 @@ The host-side VPK daemon (`misc/update-cs2-centralized.sh`) writes to the system
 
 **Diagnose (on host)**:
 ```bash
+grep ^SERVER_IMAGE= /usr/local/bin/update-cs2-centralized.sh   # must list this server's image
 sudo systemctl status cs2-vpk-daemon
 sudo journalctl -u cs2-vpk-daemon -n 100 --no-pager
 ls -la /srv/cs2-shared                      # the shared install the daemon pushes from
 ```
 
 **Fix**:
-1. Restart: `sudo systemctl restart cs2-vpk-daemon`
-2. If the service is missing, install it:
+1. If `SERVER_IMAGE` does not list the image this server runs, the daemon's `docker events --filter image=…` never matches it. Add it and restart — see [VPK Sync troubleshooting](../features/vpk-sync.md#server-stuck-on-waiting-for-daemon-to-finish-push). This is the usual cause after changing a server's image or migrating from another egg.
+2. Restart the daemon, **then** the server: `sudo systemctl restart cs2-vpk-daemon`. The daemon reacts only to container start events and never sweeps containers already running, so a server left waiting has missed its push and needs restarting afterwards.
+3. If the service is missing, install it:
    ```bash
    curl -fsSL https://raw.githubusercontent.com/shmitzas/CS2-Ptero-Egg/main/misc/install-cs2-update.sh -o /tmp/install-cs2-update.sh
    sudo bash /tmp/install-cs2-update.sh
    ```
-3. For `symlink` mode the daemon bind-mounts into the running container with `nsenter`, which needs kernel ≥ 5.2 and `python3` on the host. On an older host switch `VPK_PUSH_METHOD` to `hardlink` or `copy`.
-4. On a slow host, raise `DAEMON_WAIT_MAX_SECS` in the server's startup variables.
+4. For `symlink` mode the daemon bind-mounts into the running container with `nsenter`, which needs kernel ≥ 5.2 and `python3` on the host. On an older host switch `VPK_PUSH_METHOD` to `hardlink` or `copy`.
+5. On a slow host, raise `DAEMON_WAIT_MAX_SECS` in the server's startup variables.
 
 ---
 
