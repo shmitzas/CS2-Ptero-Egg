@@ -31,8 +31,8 @@ ls -la /srv/cs2-shared                      # the shared install the daemon push
 ```
 
 **Fix**:
-1. If `SERVER_IMAGE` does not list the image this server runs, the daemon's `docker events --filter image=…` never matches it. Add it and restart — see [VPK Sync troubleshooting](../features/vpk-sync.md#server-stuck-on-waiting-for-daemon-to-finish-push). This is the usual cause after changing a server's image or migrating from another egg.
-2. Restart the daemon, **then** the server: `sudo systemctl restart cs2-vpk-daemon`. The daemon reacts only to container start events and never sweeps containers already running, so a server left waiting has missed its push and needs restarting afterwards.
+1. Just moved this server to a different egg or image? Re-run the installer so the daemon picks it up, then restart the server — see [VPK Sync troubleshooting](../features/vpk-sync.md#server-stuck-on-waiting-for-daemon-to-finish-push).
+2. Otherwise restart the daemon, then the server: `sudo systemctl restart cs2-vpk-daemon`
 3. If the service is missing, install it:
    ```bash
    curl -fsSL https://raw.githubusercontent.com/shmitzas/CS2-Ptero-Egg/main/misc/install-cs2-update.sh -o /tmp/install-cs2-update.sh

@@ -99,6 +99,7 @@ Variable names and defaults match one-for-one; `DAEMON_WAIT_MAX_SECS` is the onl
 > ```bash
 > curl -fsSL https://raw.githubusercontent.com/shmitzas/CS2-Ptero-Egg/main/misc/install-cs2-update.sh -o /tmp/install-cs2-update.sh && sudo bash /tmp/install-cs2-update.sh
 > ```
+
 > [!NOTE]
 > Step 6 only avoids a pointless reinstall cycle — the install script is a no-op and deletes nothing either way.
 
