@@ -92,22 +92,13 @@ Pick **CS2 Ptero Egg (GHCR)** from the **Image** dropdown
 
 Variable names and defaults match one-for-one; `DAEMON_WAIT_MAX_SECS` is the only addition. A legacy `ADDON_SELECTION` value maps to the boolean toggles automatically.
 
-> [!WARNING]
-> **Using [VPK Sync](#-vpk-sync)?** The host daemon selects containers by image name, and it is
-> still watching the old one. Until you update it, a migrated server waits out
-> `DAEMON_WAIT_MAX_SECS` (180 s) at `Waiting for daemon to finish push...` and then downloads its
-> own ~30 GB copy of the game instead of using the shared install. Re-run the installer on the
-> host — it also repoints self-updates at this repo:
+> [!IMPORTANT]
+> **Using [VPK Sync](#-vpk-sync)?** Re-run the installer on the host afterwards, then restart your
+> servers — otherwise VPK Sync stops working for them.
 >
 > ```bash
 > curl -fsSL https://raw.githubusercontent.com/shmitzas/CS2-Ptero-Egg/main/misc/install-cs2-update.sh -o /tmp/install-cs2-update.sh && sudo bash /tmp/install-cs2-update.sh
 > ```
->
-> Restart your servers **after** that finishes — the daemon only reacts to container start events, so
-> one already sitting in the wait loop has missed its push.
->
-> Migrating a few servers at a time? See [VPK Sync troubleshooting](docs/features/vpk-sync.md#server-stuck-on-waiting-for-daemon-to-finish-push) for watching the old and new images side by side.
-
 > [!NOTE]
 > Step 6 only avoids a pointless reinstall cycle — the install script is a no-op and deletes nothing either way.
 
