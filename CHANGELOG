@@ -1,3 +1,9 @@
+-- update - 2026.10.29
+
+- fix(swiftlys2): Updating SwiftlyS2 now also brings across config files that the new version added. Previously only `bin/` and `gamedata/` were copied, so `configs/` stayed frozen at whatever your first install wrote — a setting added by a later SwiftlyS2 release never appeared on an existing server. Menu key binds (`configs/menus/menus.jsonc`) were the visible case.
+- fix(swiftlys2): `*.example.*` template files are refreshed on every update, so they document what the installed version actually supports instead of going stale.
+- Your edited configs are still left alone: a file that already exists is never overwritten. Only new files are added, and only templates are replaced.
+
 -- update - 2026.04.21
 
 - feat(cleanup): Cleanup is fully customizable now — add, disable, or retarget rules per directory, pattern, and age right in `cleanup.json`. No code edit needed.

@@ -68,6 +68,11 @@ First boot pulls SteamCMD and ~30 GB of game files. Ready at `Source2Init OK`.
 
 📖 Step-by-step: [installation guide](docs/getting-started/installation.md)
 
+> [!TIP]
+> Need a panel too? [**Pterodactyl CS2 Panel**](https://github.com/shmitzas/Pterodactyl-CS2Panel) is a drop-in
+> Pterodactyl build themed for CS2, with file-manager shortcuts and a SwiftlyS2 pre-release toggle wired to this egg's
+> variables. Optional — this egg runs on any stock Pterodactyl or Pelican panel.
+
 ## 🔄 Migrating from KitsuneLab CS2 Egg
 
 Both eggs share the same layout — `game/`, `egg/configs/`, `egg/versions.txt` — so game files, plugins, configs and already-installed frameworks carry over untouched.

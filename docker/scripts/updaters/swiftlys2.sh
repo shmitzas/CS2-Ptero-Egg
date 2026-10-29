@@ -62,10 +62,26 @@ update_swiftly() {
             local target_dir="$OUTPUT_DIR/swiftlys2"
 
             if [ -d "$target_dir" ]; then
-                # Update: only overwrite bin/ and gamedata/ (preserve user configs and plugins)
+                # bin/ and gamedata/ are upstream's: replaced outright.
                 cp -rf "$swiftly_dir/bin" "$target_dir/" && \
-                cp -rf "$swiftly_dir/gamedata" "$target_dir/" && \
-                log_message "SwiftlyS2 updated to $new_version (bin + gamedata)" "success"
+                cp -rf "$swiftly_dir/gamedata" "$target_dir/" || return 1
+
+                # Everything else is add-only, so an edited config survives but a newly
+                # shipped default still lands. Without this, configs/ froze at whatever the
+                # first install wrote and new files (configs/menus/menus.example.jsonc, for
+                # one) never appeared on an updated server.
+                cp -rn "$swiftly_dir/." "$target_dir/" 2>/dev/null || true
+
+                # *.example.* files are templates nobody is meant to edit, so they are
+                # refreshed rather than kept: a stale one is how a new setting goes unnoticed.
+                local refreshed=0
+                while IFS= read -r -d '' src; do
+                    local rel="${src#"$swiftly_dir"/}"
+                    mkdir -p "$target_dir/$(dirname "$rel")"
+                    cp -f "$src" "$target_dir/$rel" && refreshed=$((refreshed + 1))
+                done < <(find "$swiftly_dir" -type f -name '*.example.*' -print0)
+
+                log_message "SwiftlyS2 updated to $new_version (bin + gamedata, $refreshed template(s) refreshed, new configs added)" "success"
             else
                 # Fresh install: copy everything
                 cp -rn "$swiftly_dir" "$OUTPUT_DIR/" && \

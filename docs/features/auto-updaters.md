@@ -184,6 +184,27 @@ CounterStrikeSharp can coexist with:
 5. Updates `gameinfo.gi` to load SwiftlyS2
 6. Deletes `addons/metamod/swiftlys2.vdf` if present — this egg always loads SwiftlyS2 from `gameinfo.gi`, never as a MetaMod side-load
 
+### What an update overwrites
+
+| Path | On update |
+|------|-----------|
+| `bin/`, `gamedata/` | **Replaced** — upstream owns them |
+| `configs/**` that you already have | **Kept** — your edits survive |
+| `configs/**` that is new this release | **Added** |
+| `*.example.*` anywhere | **Replaced** — templates are upstream's |
+| `plugins/`, anything else you added | **Untouched** |
+
+Before this, an update copied *only* `bin/` and `gamedata/`, so `configs/` froze
+at whatever the first install wrote. A config file added by a later SwiftlyS2
+release never appeared on an existing server — `configs/menus/menus.jsonc`, which
+controls menu key binds, is the one that surfaced it.
+
+> [!NOTE]
+> **Templates are refreshed on purpose.** A `*.example.*` file is upstream's
+> documentation of what a config can contain; keeping a stale one is how a server
+> owner misses a setting that was added upstream. If you edited an example file in
+> place, copy it to the real name instead — that copy is then yours and is kept.
+
 ### Console Output
 
 ```
